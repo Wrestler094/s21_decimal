@@ -3,20 +3,20 @@
 /**
  * @brief Печать числа
  */
- void print_decimal(s21_decimal number) {
-     for (int i = 0; i < 4; i++) {
-         char binary_number[33];
+// void print_decimal(s21_decimal number) {
+//     for (int i = 0; i < 4; i++) {
+//         char binary_number[33];
 
-         for (int j = 0; j < 32; j++) {
-             binary_number[31 - j] = (char) (((number.bits[i] >> j) & 1u) + 48);
-         }
+//         for (int j = 0; j < 32; j++) {
+//             binary_number[31 - j] = (char) (((number.bits[i] >> j) & 1u) + 48);
+//         }
 
-         binary_number[32] = '\0';
-         printf("[%s]", binary_number);
-     }
+//         binary_number[32] = '\0';
+//         printf("[%s]", binary_number);
+//     }
 
-     printf("\n");
- }
+//     printf("\n");
+// }
 
 /*
  * SHIFT
@@ -127,9 +127,7 @@ void s21_set_sign(s21_decimal *number, int sign) {
 
     // Устанавливаем знак - (1)
     if (sign == 1) {
-        int mask = ~0;
-        mask >>= 31;
-        mask <<= 31;
+        int mask = 0b10000000000000000000000000000000;
         number->bits[SCALE] = number->bits[SCALE] | mask;
     }
 }

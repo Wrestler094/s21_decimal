@@ -19,11 +19,11 @@ s21_decimal.a:
 	@ar rcs s21_decimal.a $(ALL_FILE_O)
 
 test: s21_decimal.a
-	@gcc unit_tests.c s21_decimal.a $(FLAGS_PLATFORM) -o tests.o
+	@gcc unit_test.c s21_decimal.a $(FLAGS_PLATFORM) -o tests.o
 	@./tests.o
 
 gcov_report:
-	@$(CC) --coverage $(ALL_FILE) unit_tests.c $(FLAGS_PLATFORM) -o gov_report.o
+	@$(CC) --coverage $(ALL_FILE) unit_test.c $(FLAGS_PLATFORM) -o gov_report.o
 	@./gov_report.o
 	@lcov -t s21_decimal_tests -o s21_decimal_tests.info -c -d .
 	@genhtml -o report s21_decimal_tests.info
@@ -41,7 +41,7 @@ leaks: $(ALL_FILE_O)
 
 style: $(ALL_FILE)
 	@cp ../materials/linters/CPPLINT.cfg ./
-	@python3 ./../materials/linters/cpplint.py --extensions=c $(ALL_FILE) unit_tests.c
+	@python3 ./../materials/linters/cpplint.py --extensions=c $(ALL_FILE) unit_test.c
 	@rm -f CPPLINT.cfg
 
 cppcheck: $(ALL_FILE_O)
