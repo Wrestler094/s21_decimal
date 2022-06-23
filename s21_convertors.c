@@ -33,112 +33,114 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
  * @return 2 - число слишком мало или равно отрицательной бесконечности
  * @return 3 - деление на 0
  */
-int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-    int exit_status = 0;
+// int s21_from_float_to_decimal(float src, s21_decimal *dst) {
+//     int exit_status = 0;
 
-    if (dst == NULL || isfinite(src) == 0) {
-        exit_status = 1;
-    } else {
-        dst->bits[0] = 0;
-        dst->bits[1] = 0;
-        dst->bits[2] = 0;
-        dst->bits[3] = 0;
+//     if (dst == NULL || isfinite(src) == 0) {
+//         exit_status = 1;
+//     } else {
+//         dst->bits[0] = 0;
+//         dst->bits[1] = 0;
+//         dst->bits[2] = 0;
+//         dst->bits[3] = 0;
 
-        union float_value float_number_bits;
-        float_number_bits.float_view = src;
+//         union float_value float_number_bits;
+//         float_number_bits.float_view = src;
 
-        // Считываем знак
-        int float_number_sign = (int) (float_number_bits.int_view & 0b10000000000000000000000000000);
+//         // Считываем знак
+//         // Исправить маску ???
+//         int float_number_sign = (int) (float_number_bits.int_view & 0b10000000000000000000000000000);
 
-        // Считываем экспоненту
-        int exponent = 0;
+//         // Считываем экспоненту
+//         int exponent = 0;
 
-        for (int i = 0; i < 8; i++) {
-            int bit = (int) ((float_number_bits.int_view >> (30 - i)) & 1u);
+//         for (int i = 0; i < 8; i++) {
+//             int bit = (int) ((float_number_bits.int_view >> (30 - i)) & 1u);
 
-            exponent = exponent << 1;
-            s21_set_bit((unsigned int *) &exponent, 0, bit);
-        }
+//             exponent = exponent << 1;
+//             s21_set_bit((unsigned int *) &exponent, 0, bit);
+//         }
 
-        exponent = exponent - 127;
+//         exponent = exponent - 127;
 
-        if (exponent > 95) {
-            exit_status = 1;
-        } else  if (exponent > -95) {
-            // Нормализуем число
-            int scale = 0;
+//         if (exponent > 95) {
+//             exit_status = 1;
+//         } else  if (exponent > -95) {
+//             // Нормализуем число
+//             int scale = 0;
 
-            // Если число меньше 1
-            while ((int) src > 1) {
-                src *= 10;
-                scale++;
-            }
+//             // Если число меньше 1 
+//             Исправить знак ???
+//             while ((int) src > 1) {
+//                 src *= 10;
+//                 scale++;
+//             }
 
-            // Если число больше 10
-            while (src > 10) {
-                src /= 10;
-                scale--;
-            }
+//             // Если число больше 10
+//             while (src > 10) {
+//                 src /= 10;
+//                 scale--;
+//             }
 
-            int mask = 0x400000;
-            double result = 1;
+//             int mask = 0x400000;
+//             double result = 1;
 
-            // Возводим все биты в отрицательную степень двойки
-            for (int i = 1; mask != 0; i++) {
-                if (float_number_bits.int_view & mask) {
-                    result += pow(2, -i);
-                }
+//             // Возводим все биты в отрицательную степень двойки
+//             for (int i = 1; mask != 0; i++) {
+//                 if (float_number_bits.int_view & mask) {
+//                     result += pow(2, -i);
+//                 }
 
-                mask >>= 1;
-            }
+//                 mask >>= 1;
+//             }
 
-            // Приводим число к 8-9 знакам перед запятой
-            result *= pow(2, exponent);
-            result *= pow(10, 8 + scale);
+//             // Приводим число к 8-9 знакам перед запятой
+//             result *= pow(2, exponent);
+//             result *= pow(10, 8 + scale);
 
-            if (scale > 0) {
-                while (result < 10000000) {
-                    result *= 10;
-                }
-            }
+//             if (scale > 0) {
+//                 while (result < 10000000) {
+//                     result *= 10;
+//                 }
+//             }
 
-            long int tmp = round(result);
-            int remainder = 0;
+//             long int tmp = round(result);
+//             int remainder = 0;
 
-            while (tmp >= 10000000) {
-                remainder = tmp % 10;
-                tmp = round(tmp);
-                tmp /= 10;
-            }
+//             while (tmp >= 10000000) {
+//                 remainder = tmp % 10;
+//                 tmp = round(tmp);
+//                 tmp /= 10;
+//             }
 
-            while (scale + 7 > 29) {
-                remainder = tmp % 10;
-                tmp /= 10;
-                scale--;
-            }
+//             while (scale + 7 > 29) {
+//                 remainder = tmp % 10;
+//                 tmp /= 10;
+//                 scale--;
+//             }
 
-            if (remainder > 4) {
-                tmp++;
-            }
+//             if (remainder > 4) {
+//                 tmp++;
+//             }
 
-            while (tmp % 10 == 0) {
-                tmp /= 10;
-                scale--;
-            }
+//             while (tmp % 10 == 0) {
+//                 tmp /= 10;
+//                 scale--;
+//             }
 
-            s21_from_int_to_decimal((int) tmp, dst);
+//             s21_from_int_to_decimal((int) tmp, dst);
 
-            while (scale + 7 <= 0) {
-                s21_multiply_by_10(dst), scale++;
-            }
+//             while (scale + 7 <= 0) {
+//                 s21_multiply_by_10(dst), scale++;
+//             }
 
-            s21_set_sign(dst, float_number_sign);
-            s21_set_scale(dst, scale + 6);
-        }
-    }
+//             s21_set_sign(dst, float_number_sign);
+//             s21_set_scale(dst, scale + 6);
+//         }
+//     }
 
-    return exit_status;
-}
+//     return exit_status;
+// }
 
 /**
  * @brief Конвертация из децимал в int
